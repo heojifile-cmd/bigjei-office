@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#f6efe4" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="빅제이 비서실" />
+<meta name="application-name" content="빅제이 비서실" />
+<meta name="description" content="빅제이 비서실 - 오피스 맵, 회의실, 작업실, 비서현황, 메모를 한 화면에서 보는 개인 현황판" />
+<link rel="apple-touch-icon" href="icon.png" />
+<link rel="icon" type="image/png" href="icon.png" />
+<title>빅제이 비서실</title>
+<style>
+  :root {
+    --bg: #f6efe4;
+    --card: #fffaf2;
+    --card-soft: #f9f2e6;
+    --border: #e6d7c3;
+    --brown: #7c4a1d;
+    --brown-dark: #5c3410;
+    --text: #2e241b;
+    --muted: #847463;
+    --green: #22a06b;
+    --green-bg: #e7f6ee;
+    --user-bubble: #fae5e0;
+    --shadow: 0 6px 20px rgba(92, 52, 16, 0.08);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #faf3e8 0%, #f4ebdc 100%);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(16px + env(safe-area-inset-top)) 16px 12px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .crown-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff6db, #f1dec0);
+    border: 2px solid #e4cca8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    box-shadow: 0 2px 8px rgba(124, 74, 29, 0.12);
+  }
+  .brand-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .brand-sub {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .dot-green {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block;
+  }
+  .live-pill {
+    background: var(--green-bg);
+    color: #1a7f54;
+    border: 1px solid #c6ebd7;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Top 6-tab grid */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 14px 12px;
+  }
+  .nav-btn {
+    border: 1px solid transparent;
+    background: rgba(255,255,255,0.55);
+    color: var(--muted);
+    border-radius: 14px;
+    padding: 10px 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all .15s ease;
+  }
+  .nav-btn.active {
+    background: linear-gradient(180deg, #8b5422, #6f3f14);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(111, 63, 20, 0.25);
+  }
+
+  .panel { display: none; padding: 0 14px; flex: 1; flex-direction: column; gap: 12px; }
+  .panel.active { display: flex; }
+
+  /* Office Map */
+  .hero-card {
+    background: linear-gradient(135deg, #fffaf0 0%, #f9ecdc 100%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 10px;
+    font-size: 11px; font-weight: 700; color: var(--brown);
+    margin-bottom: 8px;
+  }
+  .hero-title { font-size: 17px; font-weight: 800; margin: 0 0 4px; }
+  .hero-desc { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+  .pill-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .seg-group {
+    display: inline-flex;
+    background: #efe4d4;
+    border-radius: 999px;
+    padding: 3px;
+    border: 1px solid var(--border);
+  }
+  .seg-btn {
+    border: none; background: transparent; color: var(--muted);
+    padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+  .seg-btn.active {
+    background: #fff; color: var(--text); box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .chip {
+    background: #fffaf2; border: 1px solid var(--border);
+    padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  }
+  .chip.on { background: #fff6e0; border-color: #ebd09c; color: #8c5a14; }
+
+  .map-frame {
+    position: relative;
+    background: #f5ebd9;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .map-frame img {
+    width: 100%; display: block;
+  }
+  .map-schematic {
+    display: none;
+    padding: 16px;
+    gap: 10px;
+    flex-direction: column;
+  }
+  .map-frame.schematic img, .map-frame.schematic .pin, .map-frame.schematic .char-dot {
+    display: none;
+  }
+  .map-frame.schematic .map-schematic {
+    display: flex;
+  }
+  .schem-room {
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+  }
+  .pin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 252, 246, 0.94);
+    border: 1.5px solid #e2cdb2;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--text);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.14);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform .15s ease;
+  }
+  .pin:hover { transform: translate(-50%, -50%) scale(1.06); }
+  .char-dot {
+    position: absolute;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--green); border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+  }
+  .animate-on .pin { animation: floaty 3s ease-in-out infinite; }
+  .animate-on .char-dot { animation: pulse 2s ease-in-out infinite; }
+  @keyframes floaty {
+    0%, 100% { transform: translate(-50%, -50%); }
+    50% { transform: translate(-50%, -56%); }
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,160,107,0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(34,160,107,0); }
+  }
+  .toast-bar {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 9px 12px; font-size: 12.5px; color: var(--brown-dark); font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  /* Meeting Room */
+  .sub-tabs { display: flex; gap: 8px; }
+  .sub-tab {
+    background: #fffaf2; border: 1px solid var(--border); border-radius: 999px;
+    padding: 7px 13px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer;
+  }
+  .sub-tab.active {
+    background: #fff; color: var(--text); border-color: #c89d6c;
+    box-shadow: 0 3px 10px rgba(124,74,29,0.1);
+  }
+  .room-status { font-size: 12.5px; color: var(--muted); font-weight: 600; padding: 2px 4px; }
+  .chat-box {
+    display: flex; flex-direction: column; gap: 12px;
+    background: rgba(255, 250, 242, 0.72);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 12px;
+    min-height: 310px;
+    max-height: 410px;
+    overflow-y: auto;
+  }
+  .msg-row { display: flex; gap: 9px; align-items: flex-start; }
+  .msg-row.me { flex-direction: row-reverse; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 12px;
+    background: #fff; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .msg-content { max-width: 79%; }
+  .msg-meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .msg-meta strong { color: var(--text); font-size: 12px; margin-right: 4px; }
+  .bubble {
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    padding: 10px 12px; font-size: 13.5px; line-height: 1.48;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .msg-row.me .bubble {
+    background: var(--user-bubble); border-color: #f0cbc2;
+  }
+  .composer {
+    background: #fffaf2; border: 1px solid var(--border); border-radius: 16px;
+    padding: 10px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .mention-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .m-pill {
+    background: #fff; border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 10px; font-size: 11.5px; font-weight: 700; color: var(--brown-dark); cursor: pointer;
+  }
+  .m-pill.sender { background: var(--brown); color: #fff; border-color: var(--brown); }
+  .input-row { display: flex; gap: 8px; }
+  .input-row input {
+    flex: 1; border: 1px solid var(--border); border-radius: 12px; padding: 9px 12px;
+    font-size: 13.5px; background: #fff; outline: none;
+  }
+  .send-btn {
+    background: var(--brown); color: #fff; border: none; border-radius: 12px;
+    padding: 0 15px; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+
+  /* Generic Cards for Tasks / Status / Limits / Memo */
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    padding: 13px 14px; box-shadow: 0 3px 10px rgba(92,52,16,0.05);
+  }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .card-title { font-size: 14.5px; font-weight: 800; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  }
+  .b-run { background: #e7f6ee; color: #197c52; }
+  .b-wait { background: #fff3db; color: #9c6211; }
+  .b-done { background: #eee8df; color: #6c5f52; }
+  .card-body { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .progress-track {
+    height: 8px; background: #efe4d4; border-radius: 999px; overflow: hidden; margin-top: 8px;
+  }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #8b5422, #c38443); }
+  .memo-item {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+  }
+  .del-btn {
+    border: none; background: #f6ebe5; color: #a1442c; border-radius: 8px;
+    padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="brand">
+      <div class="crown-badge">👑</div>
+      <div>
+        <div class="brand-title">빅제이 비서실</div>
+        <div class="brand-sub"><span class="dot-green"></span> 빅제이님 전용</div>
+      </div>
+    </div>
+    <div class="live-pill"><span class="dot-green"></span> 실시간 연결</div>
+  </header>
+
+  <nav class="nav-grid">
+    <button class="nav-btn active" data-tab="map">🗺️ 오피스 맵</button>
+    <button class="nav-btn" data-tab="room">💬 회의실</button>
+    <button class="nav-btn" data-tab="tasks">📋 작업실</button>
+    <button class="nav-btn" data-tab="status">📊 비서현황</button>
+    <button class="nav-btn" data-tab="limits">⚡ AI한도</button>
+    <button class="nav-btn" data-tab="memo">📝 메모</button>
+  </nav>
+
+  <!-- 1. 오피스 맵 -->
+  <section id="tab-map" class="panel active">
+    <div class="hero-card">
+      <div class="hero-tag">👑 빅제이 비서실 본부</div>
+      <p class="hero-title">대장님, 비서 4명이 대기 중이에요</p>
+      <p class="hero-desc">방을 눌러 들어가 보세요. 방마다 비서들이 일하고 있어요.</p>
+    </div>
+
+    <div class="pill-row">
+      <div class="seg-group">
+        <button class="seg-btn" id="mode-basic">🗺️ 기본</button>
+        <button class="seg-btn active" id="mode-clay">🧸 클레이</button>
+      </div>
+      <button class="chip on" id="toggle-anim">✨ 움직임 ON</button>
+    </div>
+
+    <div class="pill-row">
+      <span class="chip"><span class="dot-green"></span> 3개 방 가동</span>
+      <span class="chip">👥 ON 5명</span>
+    </div>
+
+    <div class="map-frame animate-on" id="map-frame">
+      <img src="map.png" alt="클레이 비서실 맵" />
+      <button class="pin" style="left: 20%; top: 43%;" onclick="openRoom('big')">🏛️ 대회의실</button>
+      <button class="pin" style="left: 44%; top: 27%;" onclick="openRoom('cmd')">🎯 지휘실</button>
+      <button class="pin" style="left: 62%; top: 88%;" onclick="openRoom('lounge')">☕ 라운지</button>
+
+      <div class="char-dot" style="left: 46%; top: 13%;" title="유키야 총괄비서" onclick="showInfo('👑 유키야 총괄비서: 지휘실에서 전체 일정과 알림을 총괄하고 있어요!')"></div>
+      <div class="char-dot" style="left: 47%; top: 41%;" title="양비서 (가계부)" onclick="showInfo('🐑 양비서 (가계부): 이번 달 통합 가계부 정리 완료! 밤 10시 지출 확인 대기 중')"></div>
+      <div class="char-dot" style="left: 59%; top: 38%;" title="냥비서 (쇼핑·리뷰)" onclick="showInfo('🐱 냥비서 (쇼핑·리뷰): 이벤트 응모 챙기는 중! 오늘 14:00 리뷰 작성 예정')"></div>
+      <div class="char-dot" style="left: 72%; top: 40%;" title="돌핀비서 (병원·예약)" onclick="showInfo('🐬 돌핀비서 (병원·예약): 예약 문의 답변 정리 완료, 일정 확인 대기 중')"></div>
+      <div class="char-dot" style="left: 66%; top: 61%;" title="라일락 유키 (휴식)" onclick="showInfo('🐰 라운지 유키: 빅제이님 커피 한 잔 타 놓고 기다리는 중이에요 ☕')"></div>
+
+      <div class="map-schematic">
+        <div class="schem-room" onclick="openRoom('cmd')"><span><strong>🎯 지휘실</strong> · 유키야 총괄비서</span><span>입장 →</span></div>
+        <div class="schem-room" onclick="openRoom('big')"><span><strong>🏛️ 대회의실</strong> · 양비서·냥비서·돌핀비서</span><span>입장 →</span></div>
+        <div class="schem-room" onclick="openRoom('lounge')"><span><strong>☕ 라운지</strong> · 휴식 & 아이디어</span><span>입장 →</span></div>
+      </div>
+    </div>
+
+    <div class="toast-bar" id="map-toast">
+      <span>💡 방 핀이나 캐릭터 점을 눌러 상태를 확인하세요</span>
+    </div>
+  </section>
+
+  <!-- 2. 회의실 -->
+  <section id="tab-room" class="panel">
+    <div class="sub-tabs">
+      <button class="sub-tab" data-room="big">🏛️ 대회의실</button>
+      <button class="sub-tab active" data-room="cmd">🎯 지휘실</button>
+      <button class="sub-tab" data-room="lounge">☕ 라운지</button>
+    </div>
+    <div class="room-status" id="room-status">🎯 지휘실 · ON 5명</div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="composer">
+      <div class="mention-bar">
+        <span style="font-size:11.5px;color:var(--muted);font-weight:700;">발신</span>
+        <span class="m-pill sender">👑 빅제이 (대장님)</span>
+        <button class="m-pill" onclick="addMention('@all')">@all</button>
+        <button class="m-pill" onclick="addMention('@유키야')">@유키야</button>
+        <button class="m-pill" onclick="addMention('@양비서')">@양비서</button>
+        <button class="m-pill" onclick="addMention('@냥비서')">@냥비서</button>
+        <button class="m-pill" onclick="addMention('@돌핀비서')">@돌핀비서</button>
+      </div>
+      <div class="input-row">
+        <input id="chat-input" type="text" placeholder="지시할 내용을 입력하세요 (예: @양비서 가계부 확인해줘)" />
+        <button class="send-btn" onclick="sendChat()">전송</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 작업실 -->
+  <section id="tab-tasks" class="panel">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">📋 주간 일정 및 예약 확인</span>
+        <span class="badge b-wait">확인 중</span>
+      </div>
+      <div class="card-body">이번 주 일정과 예약을 한 장으로 정리했어요. 확인이 필요한 항목부터 표시해 둘게요.</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">🎁 쇼핑·이벤트 응모 챙기기</span>
+        <span class="badge b-wait">진행 중</span>
+      </div>
+      <div class="card-body">마감이 가까운 이벤트부터 순서대로 응모 목록을 정리했어요. 오늘 마감 건부터 바로 진행할게요.</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">🛍️ 쇼핑 리뷰 작성 챙기기</span>
+        <span class="badge b-run">오늘 14:00</span>
+      </div>
+      <div class="card-body">오늘 몫 리뷰 작성을 오후 2시에 진행할 예정이에요. 남은 건은 순서대로 이어서 진행해요.</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">💳 이번 달 카드 가계부 정리</span>
+        <span class="badge b-done">반영 완료</span>
+      </div>
+      <div class="card-body">이번 달 카드 이용내역을 통합 가계부에 반영했어요. 밤 22:00에 오늘 지출을 확인해요.</div>
+    </div>
+  </section>
+
+  <!-- 4. 비서현황 -->
+  <section id="tab-status" class="panel">
+    <div class="card">
+      <div class="card-head"><span class="card-title">🐰 유키야 · 총괄비서</span><span class="badge b-run">ON · 지휘실</span></div>
+      <div class="card-body">아침 브리핑, 메일·노션 확인, 전체 작업 조율 담당</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">🐑 양비서 · 가계부 전담</span><span class="badge b-run">ON · 대회의실</span></div>
+      <div class="card-body">카드 내역 정리, 노션·엑셀·달력 동기화, 22시 지출 점검</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">🐱 냥비서 · 쇼핑·응모</span><span class="badge b-run">ON · 대회의실</span></div>
+      <div class="card-body">매일 리뷰 작성, 이벤트 응모 실행</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">🐬 돌핀비서 · 병원·예약</span><span class="badge b-run">ON · 대회의실</span></div>
+      <div class="card-body">예약 문의 확인, 일정 관리</div>
+    </div>
+  </section>
+
+  <!-- 5. AI한도 -->
+  <section id="tab-limits" class="panel">
+    <div class="card">
+      <div class="card-head"><span class="card-title">⏰ 등록된 자동 스케줄</span><span class="badge b-run">3건 가동</span></div>
+      <div class="card-body">
+        • 30분마다 새 메일 확인<br/>
+        • 매일 14:00 정기 작업 실행<br/>
+        • 매일 22:00 하루 지출 정리
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">📊 오늘 작업 진행률</span><span class="badge b-run">68%</span></div>
+      <div class="card-body">이벤트 응모 정리 · 가계부 반영 · 일정 답변 정리 완료</div>
+      <div class="progress-track"><div class="progress-fill" style="width:68%"></div></div>
+    </div>
+  </section>
+
+  <!-- 6. 메모 -->
+  <section id="tab-memo" class="panel">
+    <div class="composer">
+      <div class="input-row">
+        <input id="memo-input" type="text" placeholder="빠른 메모 남기기..." />
+        <button class="send-btn" onclick="addMemo()">추가</button>
+      </div>
+    </div>
+    <div id="memo-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </section>
+</div>
+
+<script>
+  const defaultChats = {
+    cmd: [
+      { who: 'me', name: '빅제이 (대장님)', role: '', avatar: '👑', time: '오전 10:35', text: '이번 주 일정이랑 예약 한 번에 정리해줘 @유키야 @돌핀비서' },
+      { who: 'ai', name: '유키야', role: '총괄비서', avatar: '🐰', time: '오전 10:36', text: '네, 대장님! 이번 주 일정과 예약을 한 장으로 정리해서 올려뒀습니다!🫡' },
+      { who: 'ai', name: '돌핀비서', role: '병원·예약', avatar: '🐬', time: '오전 10:36', text: '확인이 필요한 예약 건은 따로 표시해 두겠습니다!' },
+      { who: 'ai', name: '냥비서', role: '쇼핑·응모', avatar: '🐱', time: '오전 11:58', text: '이벤트 응모 목록도 마감 순서대로 정리해 뒀습니다!🔥' }
+    ],
+    big: [
+      { who: 'ai', name: '양비서', role: '가계부 전담', avatar: '🐑', time: '오전 08:01', text: '이번 달 카드 이용내역 통합 가계부에 반영 완료했습니다!' },
+      { who: 'ai', name: '냥비서', role: '쇼핑·응모', avatar: '🐱', time: '오전 08:51', text: '오늘 응모할 이벤트 목록 확인했습니다.' }
+    ],
+    lounge: [
+      { who: 'ai', name: '유키야', role: '총괄비서', avatar: '🐰', time: '오전 11:50', text: '여기는 라운지! 바쁜 일 끝나고 커피 한 잔 하면서 아이디어 정리하는 방이에요 ☕' }
+    ]
+  const defaultMemos = [
+    '오늘의 메모: 주간 일정 확인하기',
+    '이번 달 가계부 마감일 체크',
+    '장보기 목록 정리'
+  ];
+
+  let currentRoom = 'cmd';
+
+  let currentRoom = 'cmd';
+  let chats = JSON.parse(localStorage.getItem('bj_chats') || 'null') || defaultChats;
+  let memos = JSON.parse(localStorage.getItem('bj_memos') || 'null') || defaultMemos;
+
+  // Main tab switching
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Map mode toggles
+  document.getElementById('mode-basic').onclick = () => {
+    document.getElementById('mode-basic').classList.add('active');
+    document.getElementById('mode-clay').classList.remove('active');
+    document.getElementById('map-frame').classList.add('schematic');
+  };
+  document.getElementById('mode-clay').onclick = () => {
+    document.getElementById('mode-clay').classList.add('active');
+    document.getElementById('mode-basic').classList.remove('active');
+    document.getElementById('map-frame').classList.remove('schematic');
+  };
+  document.getElementById('toggle-anim').onclick = (e) => {
+    const mf = document.getElementById('map-frame');
+    const on = mf.classList.toggle('animate-on');
+    e.currentTarget.classList.toggle('on', on);
+    e.currentTarget.textContent = on ? '✨ 움직임 ON' : '✨ 움직임 OFF';
+  };
+
+  function showInfo(msg) {
+    document.getElementById('map-toast').innerHTML = '<span>' + msg + '</span>';
+  }
+
+  function openRoom(room) {
+    document.querySelector('[data-tab="room"]').click();
+    switchRoom(room);
+  }
+
+  // Room sub-tabs
+  document.querySelectorAll('.sub-tab').forEach(btn => {
+    btn.addEventListener('click', () => switchRoom(btn.dataset.room));
+  });
+
+  function switchRoom(room) {
+    currentRoom = room;
+    document.querySelectorAll('.sub-tab').forEach(b => b.classList.toggle('active', b.dataset.room === room));
+    const labels = { cmd: '🎯 지휘실 · ON 5명', big: '🏛️ 대회의실 · ON 4명', lounge: '☕ 라운지 · ON 2명' };
+    document.getElementById('room-status').textContent = labels[room];
+    renderChats();
+  }
+
+  function renderChats() {
+    const box = document.getElementById('chat-box');
+    box.innerHTML = '';
+    (chats[currentRoom] || []).forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'msg-row ' + (m.who === 'me' ? 'me' : '');
+      row.innerHTML = `
+        <div class="avatar">${m.avatar}</div>
+        <div class="msg-content">
+          <div class="msg-meta"><strong>${m.name}</strong> ${m.role ? m.role + ' · ' : ''}${m.time}</div>
+          <div class="bubble">${m.text}</div>
+        </div>`;
+      box.appendChild(row);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function addMention(tag) {
+    const inp = document.getElementById('chat-input');
+    inp.value = (inp.value ? inp.value + ' ' : '') + tag + ' ';
+    inp.focus();
+  }
+
+  function sendChat() {
+    const inp = document.getElementById('chat-input');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    const now = new Date();
+    const hm = now.toTimeString().slice(0,5);
+    chats[currentRoom].push({ who: 'me', name: '빅제이 (대장님)', role: '', avatar: '👑', time: hm, text: txt });
+    inp.value = '';
+    localStorage.setItem('bj_chats', JSON.stringify(chats));
+    renderChats();
+
+    setTimeout(() => {
+      const targets = [
+        { tag: '@양비서', name: '양비서', role: '가계부 전담', avatar: '🐑' },
+        { tag: '@냥비서', name: '냥비서', role: '쇼핑·응모', avatar: '🐱' },
+        { tag: '@돌핀비서', name: '돌핀비서', role: '병원·예약', avatar: '🐬' },
+        { tag: '@유키야', name: '유키야', role: '총괄비서', avatar: '🐰' }
+      ];
+      let matched = targets.filter(t => txt.includes(t.tag) || txt.includes('@all'));
+      if (!matched.length) matched = [targets[3]];
+      matched.forEach(t => {
+        chats[currentRoom].push({
+          who: 'ai', name: t.name, role: t.role, avatar: t.avatar, time: hm,
+          text: `네, 대장님! 알겠습니다. 말씀하신 내용 바로 확인해서 실행하겠습니다! 🫡`
+        });
+      });
+      localStorage.setItem('bj_chats', JSON.stringify(chats));
+      renderChats();
+    }, 450);
+  }
+
+  document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChat();
+  });
+
+  function renderMemos() {
+    const list = document.getElementById('memo-list');
+    list.innerHTML = '';
+    memos.forEach((m, idx) => {
+      const el = document.createElement('div');
+      el.className = 'card memo-item';
+      el.innerHTML = `<div class="card-body" style="color:var(--text)">• ${m}</div><button class="del-btn" onclick="delMemo(${idx})">삭제</button>`;
+      list.appendChild(el);
+    });
+  }
+  function addMemo() {
+    const inp = document.getElementById('memo-input');
+    const v = inp.value.trim();
+    if (!v) return;
+    memos.unshift(v);
+    inp.value = '';
+    localStorage.setItem('bj_memos', JSON.stringify(memos));
+    renderMemos();
+  }
+  function delMemo(i) {
+    memos.splice(i, 1);
+    localStorage.setItem('bj_memos', JSON.stringify(memos));
+    renderMemos();
+  }
+
+  renderChats();
+  renderMemos();
+</script>
+</body>
+</html>
