@@ -364,7 +364,7 @@
 
     <div class="pill-row">
       <span class="chip"><span class="dot-green"></span> 3개 방 가동</span>
-      <span class="chip">👥 ON 5명</span>
+      <span class="chip">👥 ON 6명</span>
     </div>
 
     <div class="map-frame animate-on" id="map-frame">
@@ -377,11 +377,12 @@
       <div class="char-dot" style="left: 47%; top: 41%;" title="양비서 (가계부)" onclick="showInfo('🐑 양비서 (가계부): 이번 달 통합 가계부 정리 완료! 밤 10시 지출 확인 대기 중')"></div>
       <div class="char-dot" style="left: 59%; top: 38%;" title="냥비서 (쇼핑·리뷰)" onclick="showInfo('🐱 냥비서 (쇼핑·리뷰): 이벤트 응모 챙기는 중! 오늘 14:00 리뷰 작성 예정')"></div>
       <div class="char-dot" style="left: 72%; top: 40%;" title="돌핀비서 (병원·예약)" onclick="showInfo('🐬 돌핀비서 (병원·예약): 예약 문의 답변 정리 완료, 일정 확인 대기 중')"></div>
+      <div class="char-dot" style="left: 34%; top: 44%;" title="부엉비서 (EMS·물류)" onclick="showInfo('🦉 부엉비서 (EMS·물류): 매일 오전 09:30 해외발송 화물추적 대기 중!')"></div>
       <div class="char-dot" style="left: 66%; top: 61%;" title="라일락 유키 (휴식)" onclick="showInfo('🐰 라운지 유키: 빅제이님 커피 한 잔 타 놓고 기다리는 중이에요 ☕')"></div>
 
       <div class="map-schematic">
         <div class="schem-room" onclick="openRoom('cmd')"><span><strong>🎯 지휘실</strong> · 유키야 총괄비서</span><span>입장 →</span></div>
-        <div class="schem-room" onclick="openRoom('big')"><span><strong>🏛️ 대회의실</strong> · 양비서·냥비서·돌핀비서</span><span>입장 →</span></div>
+        <div class="schem-room" onclick="openRoom('big')"><span><strong>🏛️ 대회의실</strong> · 양비서·냥비서·돌핀비서·부엉비서</span><span>입장 →</span></div>
         <div class="schem-room" onclick="openRoom('lounge')"><span><strong>☕ 라운지</strong> · 휴식 & 아이디어</span><span>입장 →</span></div>
       </div>
     </div>
@@ -398,7 +399,7 @@
       <button class="sub-tab active" data-room="cmd">🎯 지휘실</button>
       <button class="sub-tab" data-room="lounge">☕ 라운지</button>
     </div>
-    <div class="room-status" id="room-status">🎯 지휘실 · ON 5명</div>
+    <div class="room-status" id="room-status">🎯 지휘실 · ON 6명</div>
     <div class="chat-box" id="chat-box"></div>
     <div class="composer">
       <div class="mention-bar">
@@ -409,6 +410,7 @@
         <button class="m-pill" onclick="addMention('@양비서')">@양비서</button>
         <button class="m-pill" onclick="addMention('@냥비서')">@냥비서</button>
         <button class="m-pill" onclick="addMention('@돌핀비서')">@돌핀비서</button>
+        <button class="m-pill" onclick="addMention('@부엉비서')">@부엉비서</button>
       </div>
       <div class="input-row">
         <input id="chat-input" type="text" placeholder="지시할 내용을 입력하세요 (예: @양비서 가계부 확인해줘)" />
@@ -447,6 +449,13 @@
       </div>
       <div class="card-body">이번 달 카드 이용내역을 통합 가계부에 반영했어요. 밤 22:00에 오늘 지출을 확인해요.</div>
     </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">✈️ EMS 해외발송 화물추적</span>
+        <span class="badge b-run">매일 09:30</span>
+      </div>
+      <div class="card-body">새로 발송되는 EMS 송장을 매일 오전 확인해서 통관 보류·지연·배달완료 시 바로 보고해요.</div>
+    </div>
   </section>
 
   <!-- 4. 비서현황 -->
@@ -467,14 +476,19 @@
       <div class="card-head"><span class="card-title">🐬 돌핀비서 · 병원·예약</span><span class="badge b-run">ON · 대회의실</span></div>
       <div class="card-body">예약 문의 확인, 일정 관리</div>
     </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">🦉 부엉비서 · EMS·해외물류</span><span class="badge b-run">ON · 대회의실</span></div>
+      <div class="card-body">매일 09:30 해외발송 EMS 화물추적 및 통관·배달 변동 보고</div>
+    </div>
   </section>
 
   <!-- 5. AI한도 -->
   <section id="tab-limits" class="panel">
     <div class="card">
-      <div class="card-head"><span class="card-title">⏰ 등록된 자동 스케줄</span><span class="badge b-run">3건 가동</span></div>
+      <div class="card-head"><span class="card-title">⏰ 등록된 자동 스케줄</span><span class="badge b-run">4건 가동</span></div>
       <div class="card-body">
         • 30분마다 새 메일 확인<br/>
+        • 매일 09:30 EMS 해외발송 화물추적<br/>
         • 매일 14:00 정기 작업 실행<br/>
         • 매일 22:00 하루 지출 정리
       </div>
@@ -614,6 +628,7 @@
         { tag: '@양비서', name: '양비서', role: '가계부 전담', avatar: '🐑' },
         { tag: '@냥비서', name: '냥비서', role: '쇼핑·응모', avatar: '🐱' },
         { tag: '@돌핀비서', name: '돌핀비서', role: '병원·예약', avatar: '🐬' },
+        { tag: '@부엉비서', name: '부엉비서', role: 'EMS·해외물류', avatar: '🦉' },
         { tag: '@유키야', name: '유키야', role: '총괄비서', avatar: '🐰' }
       ];
       let matched = targets.filter(t => txt.includes(t.tag) || txt.includes('@all'));
