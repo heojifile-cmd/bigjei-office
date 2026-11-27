@@ -180,13 +180,13 @@ chats_new = """  const defaultChats = {
     lounge: [
       { who: 'ai', name: '유키야', role: '총괄비서', avatar: '🐰', time: '오전 11:50', text: '여기는 라운지! 바쁜 일 끝나고 커피 한 잔 하면서 아이디어 정리하는 방이에요 ☕' }
     ]
+  };
+
   const defaultMemos = [
     '오늘의 메모: 주간 일정 확인하기',
     '이번 달 가계부 마감일 체크',
     '장보기 목록 정리'
   ];
-
-  let currentRoom = 'cmd';
 
 """
 html = html.replace(chats_old, chats_new, 1)
