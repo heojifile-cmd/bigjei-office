@@ -20,7 +20,7 @@
 | 파일 | 설명 |
 | --- | --- |
 | `index.html` | 페이지 본체 (6개 탭, 채팅·메모 기능) |
-| `map.png` | 클레이 3D 오피스 맵 이미지 |
+| `map.jpg` | 클레이 3D 오피스 맵 이미지 |
 | `icon.png`, `icon-180.png` | 홈 화면 아이콘 |
 | `manifest.webmanifest` | 앱 설치 메타데이터 |
 

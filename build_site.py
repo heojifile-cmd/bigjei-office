@@ -19,8 +19,15 @@ html = SRC.read_text(encoding="utf-8")
 m = re.search(r'<img src="data:image/png;base64,([A-Za-z0-9+/=\s]+)"', html)
 assert m, "inline base64 image not found"
 img_bytes = base64.b64decode(re.sub(r"\s+", "", m.group(1)))
-(OUT / "map.png").write_bytes(img_bytes)
-html = html.replace('<img src="data:image/png;base64,' + m.group(1) + '"', '<img src="map.png"', 1)
+# keep the clay map as a lighter JPEG so the phone page loads fast
+from PIL import Image
+import io
+im = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+w = 1120
+im.resize((w, round(im.height * w / im.width)), Image.LANCZOS).save(
+    OUT / "map.jpg", quality=88, optimize=True, progressive=True
+)
+html = html.replace('<img src="data:image/png;base64,' + m.group(1) + '"', '<img src="map.jpg"', 1)
 
 # ---------------------------------------------------------------- head
 head_extra = """<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -193,4 +200,4 @@ html = html.replace(chats_old, chats_new, 1)
 
 (OUT / "index.html").write_text(html, encoding="utf-8")
 print("wrote", OUT / "index.html", (OUT / "index.html").stat().st_size, "bytes")
-print("wrote", OUT / "map.png", (OUT / "map.png").stat().st_size, "bytes")
+print("wrote", OUT / "map.jpg", (OUT / "map.jpg").stat().st_size, "bytes")
